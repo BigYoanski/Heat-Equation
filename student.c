@@ -61,7 +61,7 @@ int heat_eqn_solver_1d(double *heat_array, double *err, size_t num_pts){
   double* local_arr = (double*)malloc((local_n + 2) * sizeof(double));
 
   aux[beg - 1] = 0.0;
-  local_arr[end + 1] = 0.0;
+  aux[end + 1] = 0.0;
   local_arr[beg - 1] = 0.0;
   local_arr[end + 1] = 0.0;
 
@@ -104,10 +104,11 @@ int heat_eqn_solver_1d(double *heat_array, double *err, size_t num_pts){
 
       MPI_Waitall(count, reqs, MPI_STATUSES_IGNORE);
 
-      aux[end] = local_arr[end]
-         + dt / (dx * dx) *
-           (local_arr[end - 1] - 2.0 * local_arr[end]
-            + local_arr[end + 1]);
+      aux[beg] = local_arr[beg] + dt / (dx * dx) * (local_arr[beg - 1] - 2.0 * local_arr[beg] + local_arr[beg + 1]);
+
+      local_err += dx * fabs(aux[beg] - local_arr[beg]);
+
+      aux[end] = local_arr[end] + dt / (dx * dx) * (local_arr[end - 1] - 2.0 * local_arr[end] + local_arr[end + 1]);
 
       local_err += dx * fabs(aux[end] - local_arr[end]);
 
